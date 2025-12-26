@@ -29,6 +29,7 @@ class Order extends Model
     }
 
     public const STATUS_PENDING = 'pending';
+
     public const STATUS_COMPLETED = 'completed';
 
     public function user(): BelongsTo

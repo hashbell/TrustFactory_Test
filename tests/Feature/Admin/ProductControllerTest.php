@@ -12,6 +12,7 @@ class ProductControllerTest extends TestCase
     use RefreshDatabase;
 
     private User $admin;
+
     private User $regularUser;
 
     protected function setUp(): void

@@ -17,7 +17,9 @@ class CheckoutServiceTest extends TestCase
     use RefreshDatabase;
 
     private CheckoutService $checkoutService;
+
     private CartService $cartService;
+
     private User $user;
 
     protected function setUp(): void

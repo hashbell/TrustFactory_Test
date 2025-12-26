@@ -1,0 +1,20 @@
+includes:
+    - vendor/larastan/larastan/extension.neon
+
+parameters:
+    paths:
+        - app/
+        - config/
+        - database/
+        - routes/
+
+    level: 5
+
+    ignoreErrors:
+        # PDO MySQL class not found in PHP 8.3 without the extension
+        - '#Access to constant ATTR_SSL_CA on an unknown class Pdo\\Mysql#'
+
+    excludePaths:
+        analyseAndScan:
+            - app/Http/Middleware/RedirectIfAuthenticated.php (?)
+

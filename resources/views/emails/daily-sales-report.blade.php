@@ -1,30 +1,54 @@
 <x-mail::message>
 # Daily Sales Report
 
-**Date:** {{ $date }}
+<x-mail::panel>
+**Report Date:** {{ $date }}
+</x-mail::panel>
 
-## Summary
+---
 
-| Metric | Value |
-|--------|-------|
-| Total Orders | {{ $totalOrders }} |
-| Total Items Sold | {{ $totalItemsSold }} |
-| Total Revenue | ${{ number_format($totalRevenue, 2) }} |
-
-@if($totalOrders > 0)
-## Products Sold
+## Today's Performance
 
 <x-mail::table>
-| Product | Quantity | Revenue |
-|---------|----------|---------|
+| Metric | Value |
+|:-------|------:|
+| **Total Orders** | {{ $totalOrders }} |
+| **Items Sold** | {{ $totalItemsSold }} |
+| **Revenue** | **${{ number_format($totalRevenue, 2) }}** |
+</x-mail::table>
+
+@if($totalOrders > 0)
+
+---
+
+## Products Sold Today
+
+<x-mail::table>
+| Product | Qty | Revenue |
+|:--------|:---:|--------:|
 @foreach($productsSold as $product)
 | {{ $product['name'] }} | {{ $product['quantity'] }} | ${{ number_format($product['revenue'], 2) }} |
 @endforeach
 </x-mail::table>
-@else
-No orders were completed today.
+
+@if($totalRevenue >= 1000)
+<x-mail::panel>
+**Great day!** Revenue exceeded $1,000!
+</x-mail::panel>
 @endif
 
+@else
+
+<x-mail::panel>
+No orders were completed today. Tomorrow is a new opportunity!
+</x-mail::panel>
+
+@endif
+
+---
+
+<small>This is an automated report generated at {{ now()->format('g:i A') }} UTC.</small>
+
 Thanks,<br>
-{{ config('app.name') }}
+**{{ config('app.name') }}**
 </x-mail::message>

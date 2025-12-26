@@ -36,7 +36,7 @@ return [
     'reports' => [
         'daily_sales' => [
             'enabled' => env('SHOP_DAILY_REPORT_ENABLED', true),
-            'time' => env('SHOP_DAILY_REPORT_TIME', '17:15'),
+            'time' => env('SHOP_DAILY_REPORT_TIME', '18:00'),
             'max_cached' => env('SHOP_DAILY_REPORT_MAX_CACHED', 7),
         ],
     ],

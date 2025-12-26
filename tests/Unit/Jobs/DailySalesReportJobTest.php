@@ -9,6 +9,7 @@ use App\Models\Product;
 use App\Models\User;
 use App\Services\CartService;
 use App\Services\CheckoutService;
+use App\Services\SalesReportService;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
@@ -44,7 +45,7 @@ class DailySalesReportJobTest extends TestCase
         $this->createOrderForToday();
 
         $job = new DailySalesReportJob;
-        $job->handle();
+        $job->handle(app(SalesReportService::class));
 
         Mail::assertSent(DailySalesReport::class);
     }
@@ -55,7 +56,7 @@ class DailySalesReportJobTest extends TestCase
         config(['shop.admin.email' => 'admin@test.com']);
 
         $job = new DailySalesReportJob;
-        $job->handle();
+        $job->handle(app(SalesReportService::class));
 
         Mail::assertSent(DailySalesReport::class, function ($mail) {
             return $mail->hasTo('admin@test.com');
@@ -68,7 +69,7 @@ class DailySalesReportJobTest extends TestCase
         config(['shop.reports.daily_sales.enabled' => false]);
 
         $job = new DailySalesReportJob;
-        $job->handle();
+        $job->handle(app(SalesReportService::class));
 
         Mail::assertNothingSent();
     }
@@ -89,10 +90,10 @@ class DailySalesReportJobTest extends TestCase
         ]);
 
         $job = new DailySalesReportJob;
-        $job->handle();
+        $job->handle(app(SalesReportService::class));
 
         Mail::assertSent(DailySalesReport::class, function ($mail) {
-            return $mail->orders->count() === 1;
+            return $mail->reportData->totalOrders === 1;
         });
     }
 
@@ -101,10 +102,10 @@ class DailySalesReportJobTest extends TestCase
         Mail::fake();
 
         $job = new DailySalesReportJob;
-        $job->handle();
+        $job->handle(app(SalesReportService::class));
 
         Mail::assertSent(DailySalesReport::class, function ($mail) {
-            return $mail->orders->isEmpty();
+            return $mail->reportData->totalOrders === 0;
         });
     }
 }

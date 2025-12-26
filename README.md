@@ -158,9 +158,9 @@ For low stock notifications and daily reports to work:
    php artisan queue:work
    ```
 
-## Scheduled Tasks
+## Scheduled Tasks (default: 6 PM)
 
-The daily sales report runs at the configured time (default: 6 PM). To enable:
+The daily sales report runs at the configured time (default: **6 PM**). To enable:
 
 ```bash
 # Add to crontab
@@ -266,7 +266,7 @@ Consider separating React into its own project if you need:
 
 #### Architectural Decision
 
-This project uses the monorepo approach where React lives inside Laravel's `resources/js` directory, with Inertia.js bridging the two. Controllers pass data directly as props to React components—no separate API layer, no JSON responses, no client-side routing.
+This project uses the monorepo approach where React lives inside Laravel's `resources/js` directory, with Inertia.js bridging the two. Controllers pass data directly as props to React components, no separate API layer, no JSON responses, no client-side routing.
 
 The alternative would be a separate React SPA consuming a Laravel API via REST or GraphQL, using something like Sanctum for authentication and Axios for HTTP requests. That approach makes sense when you need a public API for mobile apps or third-party integrations, or when frontend and backend teams work independently.
 

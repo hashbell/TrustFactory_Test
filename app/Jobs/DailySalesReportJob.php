@@ -2,8 +2,10 @@
 
 namespace App\Jobs;
 
+use App\DTOs\SalesReportData;
 use App\Mail\DailySalesReport;
 use App\Models\Order;
+use App\Services\SalesReportService;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
@@ -20,7 +22,7 @@ class DailySalesReportJob implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public function handle(): void
+    public function handle(SalesReportService $salesReportService): void
     {
         $adminEmail = config('shop.admin.email');
 
@@ -37,31 +39,28 @@ class DailySalesReportJob implements ShouldQueue
             ->completedToday()
             ->get();
 
-        $report = new DailySalesReport($orders);
-        $totalOrders = $report->getTotalOrders();
-        $totalRevenue = $report->getTotalRevenue();
-        $totalItems = $report->getTotalItemsSold();
+        $reportData = $salesReportService->generate($orders);
 
-        Log::info("[DAILY REPORT] Completed orders: {$totalOrders} | Revenue: \$".number_format($totalRevenue, 2)." | Items sold: {$totalItems}");
+        Log::info("[DAILY REPORT] Completed orders: {$reportData->totalOrders} | Revenue: \$".number_format($reportData->totalRevenue, 2)." | Items sold: {$reportData->totalItemsSold}");
 
-        Mail::to($adminEmail)->send($report);
+        Mail::to($adminEmail)->send(new DailySalesReport($reportData));
 
-        $this->cacheNotification($report);
+        $this->cacheNotification($reportData);
 
         Log::info("[DAILY REPORT] Email sent to {$adminEmail}");
     }
 
-    private function cacheNotification(DailySalesReport $report): void
+    private function cacheNotification(SalesReportData $reportData): void
     {
         $notifications = Cache::get('daily_sales_notifications', []);
         $notifications[] = [
             'id' => uniqid(),
             'date' => today()->format('Y-m-d'),
-            'total_orders' => $report->getTotalOrders(),
-            'total_revenue' => $report->getTotalRevenue(),
-            'total_items' => $report->getTotalItemsSold(),
-            'products_sold' => $report->getProductsSold()->toArray(),
-            'message' => "Daily report: {$report->getTotalOrders()} orders, \$".number_format($report->getTotalRevenue(), 2).' revenue',
+            'total_orders' => $reportData->totalOrders,
+            'total_revenue' => $reportData->totalRevenue,
+            'total_items' => $reportData->totalItemsSold,
+            'products_sold' => $reportData->productsSold->toArray(),
+            'message' => "Daily report: {$reportData->totalOrders} orders, \$".number_format($reportData->totalRevenue, 2).' revenue',
             'sent_at' => now()->toISOString(),
         ];
 

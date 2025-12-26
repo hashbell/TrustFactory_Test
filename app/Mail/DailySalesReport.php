@@ -2,15 +2,12 @@
 
 namespace App\Mail;
 
-use App\Models\Order;
-use App\Models\OrderItem;
+use App\DTOs\SalesReportData;
 use Illuminate\Bus\Queueable;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Collection as SupportCollection;
 
 class DailySalesReport extends Mailable
 {
@@ -19,11 +16,9 @@ class DailySalesReport extends Mailable
 
     /**
      * Create a new message instance.
-     *
-     * @param  Collection<int, Order>  $orders
      */
     public function __construct(
-        public readonly Collection $orders
+        public readonly SalesReportData $reportData
     ) {}
 
     /**
@@ -32,7 +27,7 @@ class DailySalesReport extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Daily Sales Report - '.now()->format('F j, Y'),
+            subject: 'Daily Sales Report - '.$this->reportData->date,
         );
     }
 
@@ -44,54 +39,13 @@ class DailySalesReport extends Mailable
         return new Content(
             markdown: 'emails.daily-sales-report',
             with: [
-                'orders' => $this->orders,
-                'totalRevenue' => $this->getTotalRevenue(),
-                'totalOrders' => $this->getTotalOrders(),
-                'totalItemsSold' => $this->getTotalItemsSold(),
-                'productsSold' => $this->getProductsSold(),
-                'date' => now()->format('F j, Y'),
+                'totalRevenue' => $this->reportData->totalRevenue,
+                'totalOrders' => $this->reportData->totalOrders,
+                'totalItemsSold' => $this->reportData->totalItemsSold,
+                'productsSold' => $this->reportData->productsSold,
+                'date' => $this->reportData->date,
             ],
         );
-    }
-
-    public function getTotalRevenue(): float
-    {
-        return $this->orders->sum('total_amount');
-    }
-
-    public function getTotalOrders(): int
-    {
-        return $this->orders->count();
-    }
-
-    public function getTotalItemsSold(): int
-    {
-        return $this->orders->flatMap(fn (Order $order) => $order->items)->sum('quantity');
-    }
-
-    /**
-     * @return SupportCollection<int, array{id: int, name: string, quantity: int, revenue: float}>
-     */
-    public function getProductsSold(): SupportCollection
-    {
-        /** @var SupportCollection<int, OrderItem> $allItems */
-        $allItems = $this->orders->flatMap(fn (Order $order) => $order->items);
-
-        return $allItems
-            ->groupBy('product_id')
-            ->map(function (SupportCollection $items): array {
-                /** @var OrderItem $first */
-                $first = $items->first();
-
-                return [
-                    'id' => $first->product_id,
-                    'name' => $first->product->name,
-                    'quantity' => (int) $items->sum('quantity'),
-                    'revenue' => (float) $items->sum(fn (OrderItem $item) => $item->quantity * $item->price),
-                ];
-            })
-            ->sortByDesc('quantity')
-            ->values();
     }
 
     /**

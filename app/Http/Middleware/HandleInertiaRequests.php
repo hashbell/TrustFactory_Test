@@ -2,9 +2,7 @@
 
 namespace App\Http\Middleware;
 
-use App\Models\Product;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Cache;
 use Inertia\Middleware;
 
 class HandleInertiaRequests extends Middleware
@@ -31,32 +29,11 @@ class HandleInertiaRequests extends Middleware
      */
     public function share(Request $request): array
     {
-        $user = $request->user();
-        $lowStockThreshold = config('shop.stock.low_stock_threshold', 5);
-
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $user,
+                'user' => $request->user(),
             ],
-            'flash' => [
-                'success' => fn () => $request->session()->get('success'),
-                'error' => fn () => $request->session()->get('error'),
-            ],
-            'shopConfig' => [
-                'lowStockThreshold' => $lowStockThreshold,
-                'perPage' => config('shop.pagination.per_page', 12),
-                'dailyReportTime' => config('shop.reports.daily_sales.time', '18:00'),
-            ],
-            // Admin-only: Low stock notifications and counts
-            'adminNotifications' => $user?->isAdmin() ? [
-                'lowStockCount' => Product::where('stock_quantity', '>', 0)
-                    ->where('stock_quantity', '<=', $lowStockThreshold)
-                    ->count(),
-                'soldOutCount' => Product::where('stock_quantity', 0)->count(),
-                'recentAlerts' => Cache::get('low_stock_notifications', []),
-                'recentReports' => Cache::get('daily_sales_notifications', []),
-            ] : null,
         ];
     }
 }

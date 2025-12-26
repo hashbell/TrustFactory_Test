@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Link, usePage, router } from '@inertiajs/react';
 import { PageProps } from '@/types';
 
 export default function AdminNotifications() {
     const { adminNotifications, shopConfig } = usePage<PageProps>().props;
     const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef<HTMLDivElement>(null);
     const [seenAlerts, setSeenAlerts] = useState<string[]>([]);
     const [seenReports, setSeenReports] = useState<string[]>([]);
     const [showNewAlert, setShowNewAlert] = useState(false);
@@ -22,14 +23,31 @@ export default function AdminNotifications() {
         setIsInitialized(true);
     }, []);
 
-    // Poll for new notifications every 15 seconds
+    // Poll for new notifications every 5 seconds
     useEffect(() => {
         const interval = setInterval(() => {
             router.reload({ only: ['adminNotifications'] });
-        }, 15000);
+        }, 5000);
 
         return () => clearInterval(interval);
     }, []);
+
+    // Close dropdown when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+                setIsOpen(false);
+            }
+        };
+
+        if (isOpen) {
+            document.addEventListener('mousedown', handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, [isOpen]);
 
     // Check for new alerts/reports - only after localStorage is loaded
     useEffect(() => {
@@ -45,6 +63,9 @@ export default function AdminNotifications() {
         if (hasNewAlerts || hasNewReports) {
             setShowNewAlert(true);
             const timer = setTimeout(() => setShowNewAlert(false), 5000);
+            // Update counts immediately to prevent re-triggering
+            setPrevAlertCount(currentAlertCount);
+            setPrevReportCount(currentReportCount);
             return () => clearTimeout(timer);
         }
 
@@ -79,7 +100,7 @@ export default function AdminNotifications() {
     };
 
     return (
-        <div className="relative">
+        <div className="relative" ref={dropdownRef}>
             <button
                 onClick={() => {
                     setIsOpen(!isOpen);
@@ -187,13 +208,7 @@ export default function AdminNotifications() {
             })()}
 
             {isOpen && (
-                <>
-                    <div
-                        className="fixed inset-0 z-40"
-                        onClick={() => setIsOpen(false)}
-                    />
-
-                    <div className="absolute right-0 top-12 z-50 w-96 max-h-[70vh] overflow-hidden bg-neutral-900/95 backdrop-blur-xl border border-neutral-700 rounded-xl shadow-2xl">
+                <div className="absolute right-0 top-12 z-50 w-96 max-h-[70vh] overflow-hidden bg-neutral-900/95 backdrop-blur-xl border border-neutral-700 rounded-xl shadow-2xl">
                         <div className="border-b border-neutral-800">
                             <div className="flex">
                                 <button
@@ -371,8 +386,7 @@ export default function AdminNotifications() {
                                 </div>
                             </>
                         )}
-                    </div>
-                </>
+                </div>
             )}
         </div>
     );

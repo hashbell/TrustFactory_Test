@@ -1,59 +1,345 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# TrustFactory - E-commerce Shopping Cart
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A modern e-commerce shopping cart application built with Laravel, React, Inertia.js, and Tailwind CSS.
 
-## About Laravel
+## Installation
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### Prerequisites
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+- PHP 8.2+
+- Composer
+- Node.js 18+
+- SQLite (or configure your preferred database)
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### Setup
 
-## Learning Laravel
+1. **Clone the repository**
+   ```bash
+   git clone <repository-url>
+   cd trustfactory
+   ```
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework. You can also check out [Laravel Learn](https://laravel.com/learn), where you will be guided through building a modern Laravel application.
+2. **Install PHP dependencies**
+   ```bash
+   composer install
+   ```
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+3. **Install Node dependencies**
+   ```bash
+   npm install
+   ```
 
-## Laravel Sponsors
+4. **Environment setup**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
+5. **Database setup**
+   ```bash
+   touch database/database.sqlite
+   php artisan migrate --seed
+   ```
 
-### Premium Partners
+6. **Build assets**
+   ```bash
+   npm run build
+   ```
 
-- **[Vehikl](https://vehikl.com)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Redberry](https://redberry.international/laravel-development)**
-- **[Active Logic](https://activelogic.com)**
+## Configuration
 
-## Contributing
+Shop-specific settings can be configured via environment variables:
 
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
+```env
+# Stock
+SHOP_LOW_STOCK_THRESHOLD=5           # Trigger notification when stock <= this
 
-## Code of Conduct
+# Pagination
+SHOP_PRODUCTS_PER_PAGE=12            # Products per page on index
 
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
+# Admin
+SHOP_ADMIN_EMAIL=admin@trustfactory.test  # Receives notifications and reports
 
-## Security Vulnerabilities
+# Reports
+SHOP_DAILY_REPORT_ENABLED=true       # Enable/disable daily sales report
+SHOP_DAILY_REPORT_TIME=18:00         # Time to send daily report (24h format)
+SHOP_DAILY_REPORT_MAX_CACHED=7       # Max cached reports for admin UI
 
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
+# Notifications
+SHOP_LOW_STOCK_NOTIFICATION=true     # Enable/disable low stock emails
+SHOP_LOW_STOCK_MAX_CACHED=10         # Max cached alerts for admin UI
+```
 
-## License
+## Development
 
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+### Run the development servers
+
+```bash
+# Option 1: Run all servers concurrently
+composer dev
+
+# Option 2: Run individually
+php artisan serve          # Laravel server (http://localhost:8000)
+npm run dev                # Vite dev server (hot reload)
+php artisan queue:work     # Queue worker (for emails)
+php artisan schedule:work  # Scheduler (for daily reports)
+```
+## Testing
+
+```bash
+php artisan test
+```
+
+## Code Quality
+
+This project uses **Laravel Pint** for code formatting and **PHPStan** (Level 5) for static analysis.
+
+### Laravel Pint
+
+```bash
+# Auto-fix code style
+composer format
+
+# Check style without fixing
+composer format:check
+
+# Or run directly
+./vendor/bin/pint
+```
+
+### PHPStan
+
+```bash
+# Run static analysis
+composer lint
+
+# Or run directly
+./vendor/bin/phpstan analyse --memory-limit=2G
+```
+
+### Run All Checks
+
+```bash
+# Run format check, PHPStan, and tests in one command
+composer check
+```
+
+### Default Users
+
+After seeding, the following test users are available:
+
+| Role  | Email                    | Password |
+|-------|--------------------------|----------|
+| Admin | admin@trustfactory.test  | password |
+| User  | test_user@trustfactory.test | password |
+
+## Queue Configuration
+
+For low stock notifications and daily reports to work:
+
+1. **Configure mail settings in `.env`**
+   ```env
+   MAIL_MAILER=smtp
+   MAIL_HOST=your-smtp-host
+   MAIL_PORT=587
+   MAIL_USERNAME=your-username
+   MAIL_PASSWORD=your-password
+   MAIL_FROM_ADDRESS=noreply@trustfactory.test
+   MAIL_FROM_NAME="TrustFactory"
+   ```
+
+2. **Run the queue worker**
+   ```bash
+   php artisan queue:work
+   ```
+
+## Scheduled Tasks
+
+The daily sales report runs at the configured time (default: 6 PM). To enable:
+
+```bash
+# Add to crontab
+* * * * * cd /path/to/trustfactory && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Or run manually:
+```bash
+php artisan report:daily-sales
+```
+
+## Routes
+
+### Public Routes
+
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | /products | List all products (supports `?sort=latest\|price-asc\|price-desc`) |
+| GET | /products/{id} | View product details |
+
+### Authenticated Routes
+
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | /cart | View cart |
+| POST | /cart | Add item to cart |
+| PATCH | /cart/{productId} | Update item quantity |
+| DELETE | /cart/{productId} | Remove item from cart |
+| POST | /cart/clear | Clear entire cart |
+| POST | /checkout | Process checkout |
+| GET | /orders | View order history |
+| GET | /orders/{id} | View order details |
+
+### Admin Routes
+
+| Method | URI | Description |
+|--------|-----|-------------|
+| GET | /admin/products | List all products |
+| GET | /admin/products/create | Create product form |
+| POST | /admin/products | Store new product |
+| GET | /admin/products/{id}/edit | Edit product form |
+| PUT | /admin/products/{id} | Update product |
+| DELETE | /admin/products/{id} | Delete product |
+
+
+## Features
+
+- **Product Browsing**: Browse products with pagination, sorting, and detailed views
+- **Shopping Cart**: Add products, update quantities, and remove items
+- **Checkout**: Complete purchases with automatic stock management
+- **Order History**: View past orders with detailed breakdowns
+- **User Authentication**: Secure login and registration
+- **Admin Dashboard**: Manage products with CRUD operations
+- **Low Stock Notifications**: Automatic email alerts when products run low
+- **Daily Sales Reports**: Scheduled email reports of daily sales
+- **Real-time Admin Notifications**: Live polling for inventory alerts and sales reports
+
+## Tech Stack
+
+- **Backend**: Laravel 12
+- **Frontend**: React 18 with TypeScript
+- **UI Bridge**: Inertia.js
+- **Styling**: Tailwind CSS
+- **Database**: SQLite (configurable)
+- **Queue**: Laravel Queues for background jobs
+- **Code Quality**: PHPStan (Level 5) + Laravel Pint
+- **PHP Version**: 8.2+
+
+## Architecture
+
+This project follows **Clean Architecture** and **SOLID principles**:
+
+- **Models**: Eloquent models with relationships
+- **Repositories**: Data access abstraction layer (Interface-based)
+- **Services**: Business logic layer
+- **Controllers**: HTTP request handlers
+- **Jobs**: Background processing for notifications
+
+### Why React Inside Laravel (Monorepo)?
+
+This project uses the **monorepo approach** with React residing in Laravel's `resources/js` folder rather than as a separate project. Here's why:
+
+#### This Approach (Monorepo + Inertia.js)
+
+| Aspect | Benefit |
+|--------|---------|
+| **Routing** | Laravel handles all routing - no client-side router needed |
+| **Authentication** | Session-based auth - simpler than API tokens |
+| **Deployment** | Single deployment - one server, one codebase |
+| **Data Flow** | Props passed directly from controllers - no API calls |
+| **SEO** | Server-side rendering support out of the box |
+| **Development** | Faster iteration - no CORS, no API versioning |
+
+#### When to Use Separate Projects Instead
+
+Consider separating React into its own project if you need:
+
+- **Mobile apps** consuming the same API
+- **Third-party integrations** requiring a public API
+- **Independent scaling** of frontend and backend
+- **Separate teams** for frontend and backend development
+- **Multiple frontends** (web, admin panel, mobile)
+
+#### Architectural Decision
+
+This project uses the monorepo approach where React lives inside Laravel's `resources/js` directory, with Inertia.js bridging the two. Controllers pass data directly as props to React components—no separate API layer, no JSON responses, no client-side routing.
+
+The alternative would be a separate React SPA consuming a Laravel API via REST or GraphQL, using something like Sanctum for authentication and Axios for HTTP requests. That approach makes sense when you need a public API for mobile apps or third-party integrations, or when frontend and backend teams work independently.
+
+For this shopping cart application, the monorepo approach is the better fit. It's a single web application with no mobile app requirement. Laravel Breeze officially scaffolds projects this way, and Inertia.js was specifically designed for this pattern. Session-based authentication is simpler than token-based auth, and having everything in one codebase speeds up development since there's no CORS configuration or API versioning to deal with.
+
+### Directory Structure
+
+```
+app/
+├── Contracts/
+│   └── Repositories/      # Repository interfaces (loose coupling)
+├── Http/
+│   ├── Controllers/       # HTTP controllers
+│   ├── Middleware/        # Request middleware
+│   └── Requests/          # Form request validation
+├── Jobs/                  # Background jobs (notifications, reports)
+├── Mail/                  # Mailable classes
+├── Models/                # Eloquent models
+├── Repositories/          # Repository implementations
+└── Services/              # Business logic services
+
+resources/js/
+├── Components/            # Reusable React components
+├── Layouts/               # Page layouts
+├── Pages/                 # Inertia pages (routes)
+└── types/                 # TypeScript definitions
+
+config/
+└── shop.php               # Shop-specific configuration
+```
+
+### SOLID Principles Implementation
+
+| Principle | Implementation |
+|-----------|----------------|
+| **Single Responsibility** | Controllers → Services → Repositories (each has one job) |
+| **Open/Closed** | Configurable via `config/shop.php` without code changes |
+| **Liskov Substitution** | All repositories implement interfaces |
+| **Interface Segregation** | Focused interfaces (4 methods, not 20) |
+| **Dependency Inversion** | Services depend on interfaces, not concrete classes |
+
+
+
+## Future Improvements
+
+Given more time, the following features and enhancements could be implemented:
+
+### Features
+
+- **Payment Integration**: Integrate with Stripe/PayPal for real payment processing
+- **Product Categories**: Add category management and filtering
+- **Product Search**: Full-text search with filters (price range, availability)
+- **Wishlist**: Allow users to save products for later
+- **Product Reviews**: User ratings and reviews system
+- **Inventory Management**: Bulk stock updates, stock history tracking
+- **Order Status Tracking**: Order lifecycle (processing → shipped → delivered)
+- **Email Templates**: Customizable email templates with better styling
+- **Multiple Images**: Support multiple product images with gallery view
+
+### Technical Improvements
+
+- **API Layer**: RESTful API for mobile app integration
+- **Real-time Notifications**: WebSockets (Laravel Reverb) instead of polling
+- **Caching**: Redis caching for products and cart data
+- **Image Uploads**: Cloud storage (S3) for product images
+- **CI/CD Pipeline**: GitHub Actions for automated testing and deployment
+- **Docker**: Containerized development environment
+- **Rate Limiting**: API throttling for abuse prevention
+- **Audit Logging**: Track admin actions and order changes
+- **Multi-currency**: Support for multiple currencies
+- **Internationalization (i18n)**: Multi-language support
+
+### Testing
+
+- **E2E Tests**: Browser testing with Laravel Dusk or Playwright
+- **Load Testing**: Performance benchmarks with k6 or Artillery
+- **Higher PHPStan Level**: Upgrade from Level 5 to Level 8+
+
+## Contact
+
+For further enquiries, reach out via email: **bellopromise5322@gmail.com**

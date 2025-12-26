@@ -29,11 +29,20 @@ class CartService
             throw new InvalidArgumentException('Product is out of stock.');
         }
 
-        if ($product->stock_quantity < $quantity) {
-            throw new InvalidArgumentException('Requested quantity exceeds available stock.');
-        }
-
         $cart = $this->cartRepository->getCartForUser($user);
+
+        // Check existing cart quantity + new quantity against stock
+        $existingItem = $this->cartRepository->findCartItem($cart, $productId);
+        $currentCartQuantity = $existingItem ? $existingItem->quantity : 0;
+        $totalQuantity = $currentCartQuantity + $quantity;
+
+        if ($totalQuantity > $product->stock_quantity) {
+            // Cap at available stock
+            $quantity = $product->stock_quantity - $currentCartQuantity;
+            if ($quantity <= 0) {
+                throw new InvalidArgumentException('Maximum stock quantity already in cart.');
+            }
+        }
 
         return $this->cartRepository->addItem($cart, $productId, $quantity);
     }

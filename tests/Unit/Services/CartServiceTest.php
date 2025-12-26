@@ -66,14 +66,28 @@ class CartServiceTest extends TestCase
         $this->cartService->addToCart($this->user, $product->id, 1);
     }
 
-    public function test_add_to_cart_throws_exception_when_quantity_exceeds_stock(): void
+    public function test_add_to_cart_caps_quantity_at_available_stock(): void
     {
         $product = Product::factory()->create(['stock_quantity' => 5]);
 
-        $this->expectException(InvalidArgumentException::class);
-        $this->expectExceptionMessage('Requested quantity exceeds available stock.');
+        // Try to add 10, should cap at 5
+        $cartItem = $this->cartService->addToCart($this->user, $product->id, 10);
 
-        $this->cartService->addToCart($this->user, $product->id, 10);
+        $this->assertEquals(5, $cartItem->quantity);
+    }
+
+    public function test_add_to_cart_throws_exception_when_max_stock_already_in_cart(): void
+    {
+        $product = Product::factory()->create(['stock_quantity' => 5]);
+
+        // Add all 5 to cart
+        $this->cartService->addToCart($this->user, $product->id, 5);
+
+        // Try to add more - should throw exception
+        $this->expectException(InvalidArgumentException::class);
+        $this->expectExceptionMessage('Maximum stock quantity already in cart.');
+
+        $this->cartService->addToCart($this->user, $product->id, 1);
     }
 
     public function test_update_quantity_changes_cart_item_quantity(): void

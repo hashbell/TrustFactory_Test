@@ -2,6 +2,11 @@
 
 A modern e-commerce shopping cart application built with Laravel, React, Inertia.js, and Tailwind CSS.
 
+## Demo Video
+
+- [Part 1 - Application Walkthrough](https://www.loom.com/share/a3d323ef7dcf424aa03ffd2fa0ca493f)
+- [Part 2 - Code Explanation](https://www.loom.com/share/c845b2f735ec44ce84caa9237acdff28)
+
 ## Installation
 
 ### Prerequisites

@@ -70,7 +70,6 @@ class CartServiceTest extends TestCase
     {
         $product = Product::factory()->create(['stock_quantity' => 5]);
 
-        // Try to add 10, should cap at 5
         $cartItem = $this->cartService->addToCart($this->user, $product->id, 10);
 
         $this->assertEquals(5, $cartItem->quantity);
@@ -80,10 +79,8 @@ class CartServiceTest extends TestCase
     {
         $product = Product::factory()->create(['stock_quantity' => 5]);
 
-        // Add all 5 to cart
         $this->cartService->addToCart($this->user, $product->id, 5);
 
-        // Try to add more - should throw exception
         $this->expectException(InvalidArgumentException::class);
         $this->expectExceptionMessage('Maximum stock quantity already in cart.');
 

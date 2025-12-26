@@ -158,9 +158,9 @@ For low stock notifications and daily reports to work:
    php artisan queue:work
    ```
 
-## Scheduled Tasks (default: 6 PM)
+## Scheduled Tasks (default: 6 PM UTC)
 
-The daily sales report runs at the configured time (default: **6 PM**). To enable:
+The daily sales report runs at the configured time (default: **6 PM UTC**). To enable:
 
 ```bash
 # Add to crontab
